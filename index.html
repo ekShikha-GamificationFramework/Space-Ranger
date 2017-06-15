@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>RACE</title>
+        <style>
+            @font-face {
+                font-family: TooneyNoodleNF;
+                src: url(TooneyNoodleNF.ttf);
+            }
+            #world {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: linear-gradient(#000000, #434343);
+            }
+            #hud {
+                position:absolute;
+                top: 0px;
+                left: 0px;
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                font-family: TooneyNoodleNF;
+            }
+            #time {
+                font-size: 50px;
+                color: white;
+                float: left;
+                padding: 20px;
+            }
+            #score {
+                font-size: 50px;
+                color: white;
+                float: right;
+                padding: 20px;
+            }
+            #middle {
+                position: fixed;
+                top: 20%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                transform: -webkit-translate(-50%, -50%);
+                transform: -moz-translate(-50%, -50%);
+                transform: -ms-translate(-50%, -50%);
+                font-size: 50px;
+                color: white;
+            }
+            #questionbox {
+                font-size: 30px;
+                color: white;
+                position:absolute;
+                left: 50%;
+                transform: translate(-50%, 0%);
+                transform: -webkit-translate(-50%, 0%);
+                transform: -moz-translate(-50%, 0%);
+                transform: -ms-translate(-50%, 0%);
+                bottom:0;
+                width:80%;
+                height:30%;
+
+            }
+            #question {
+                border: 2px solid red;
+                text-align: center;
+                margin: 5px;
+                background-image: radial-gradient(circle, #3F9CBA 0%, #153346 100%);
+                opacity: 0.7;
+                filter: alpha(opacity=70);
+                color: black;
+            }
+            .question-close {
+                margin-left: 400px;
+                width: 10%;
+                -webkit-transition: width 2s, margin-left 2s; /* For Safari 3.1 to 6.0 */
+                transition: width 2s, margin-left 2s;
+            }
+            .question-open {
+                margin-left: 5px;
+                width: 98%;
+                -webkit-transition: width 2s, margin-left 2s; /* For Safari 3.1 to 6.0 */
+                transition: width 2s, margin-left 2s;
+            }
+            #options {
+            }
+            #option1 {
+                border: 5px solid green;
+                width: 48%;
+                height: 48%;
+                float: left;
+                margin: 5px;
+            }
+            #option2 {
+                border: 5px solid green;
+                width: 48%;
+                height: 48%;
+                float: right;
+                margin: 5px;
+            }
+            #option3 {
+                border: 5px solid green;
+                width: 48%;
+                height: 48%;
+                float: left;
+                margin: 5px;
+            }
+            #option4 {
+                border: 5px solid green;
+                width: 48%;
+                height: 48%;
+                float: right;
+                margin: 5px;
+
+            }
+        </style>
+    </head>
+    <body>
+        <script src="js/three.js"></script>
+        <script src="js/game.js"></script>
+        <div id="container">
+            <div id="world"></div>
+            <div id="hud">
+                <div id="time">TIME: </div>
+                <div id="score">SCORE: </div>
+                <div id="middle">SPACE RANGER</div>
+                <div id="questionbox">
+                    <div id="question" >solve this</div>
+                    <div id="options">
+                        <div id="option1" onclick="clicked(this)">A</div>
+                        <div id="option2" onclick="clicked(this)">B</div>
+                        <div id="option3" onclick="clicked(this)">C</div>
+                        <div id="option4" onclick="clicked(this)">D</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

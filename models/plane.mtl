@@ -1,0 +1,13 @@
+# Blender MTL File: 'Sketchfab_2015_09_29_19_40_53.blend.blend'
+# Material Count: 1
+
+newmtl Material
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd source/textures/space_ship_test_color.png
