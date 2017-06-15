@@ -29,7 +29,8 @@ var carGeom;
 var carMat = [null, null, null, null];
 var playerCar;  //number of player's car - {0, 1, 2, 3}
 var smarty, average, idiot;    //random enemies
-var answerTime = [5, 5, 5, 5];    //time took by computer cars to answer (in seconds)
+var answerTime = [3, 3, 3, 3];    //time took by computer cars to answer (in seconds)
+var answerTimeRange = [1, 4];     //range between which the computer answers, e.g after every random(1, 4) seconds
 var carReady = [false, false, false, false];
 var accelerations = [0, 0, 0, 0];  //accelerations of all cars
 var defaultSpeed = 100;
@@ -136,7 +137,8 @@ function updateCars(delta) {
                         accelerations[i] = speedDown;
                     else
                         accelerations[i] = speedUp;
-                    answerTime[i] = Math.random()*4 + 2;        //will give next answer in some random(between 5 and 9) seconds later
+                    //this vehicle will give next answer in some random(specified in answerTimeRange) seconds later
+                    answerTime[i] = Math.random()*answerTimeRange[1] + answerTimeRange[1] - answerTimeRange[0];
                     break;
                 case average:
                     //gives correct answer 75% of time
@@ -145,7 +147,8 @@ function updateCars(delta) {
                         accelerations[i] = speedDown;
                     else
                         accelerations[i] = speedUp;
-                    answerTime[i] = Math.random()*4 + 2;        //will give next answer in some random(between 5 and 9) seconds later
+                    //this vehicle will give next answer in some random(specified in answerTimeRange) seconds later
+                    answerTime[i] = Math.random()*answerTimeRange[1] + answerTimeRange[1] - answerTimeRange[0];
                     break;
                 case idiot:
                     //gives correct answer 50% of time
@@ -154,7 +157,8 @@ function updateCars(delta) {
                         accelerations[i] = speedDown;
                     else
                         accelerations[i] = speedUp;
-                    answerTime[i] = Math.random()*4 + 2;        //will give next answer in some random(between 5 and 9) seconds later
+                    //this vehicle will give next answer in some random(specified in answerTimeRange) seconds later
+                    answerTime[i] = Math.random()*answerTimeRange[1] + answerTimeRange[1] - answerTimeRange[0];
                     break;
                 default:
                     break;
@@ -316,9 +320,10 @@ function createCars() {
     for(var i = 0; i < 4; i++) {
         cars[i] = new THREE.Mesh(carGeom, carMat[i]);
         scene.add(cars[i]);
-        cars[i].position.x = -22.5 + 15*i;
         carReady[i] = true;
         cars[i].rotation.y = Math.PI;
+        cars[i].position.x = -(WIDTH/45) + (WIDTH/75)*i;
+        console.log(WIDTH);
         cars[i].scale.set(WIDTH/carScaleFactor, WIDTH/carScaleFactor, WIDTH/carScaleFactor);
     }
 }
@@ -414,8 +419,11 @@ function handleWindowResize() {
     renderer.setSize(WIDTH, HEIGHT);
     camera.aspect = WIDTH / HEIGHT;
     camera.updateProjectionMatrix();
+    console.log(WIDTH);
+
     for(var i = 0; i < 4; i++) {
         if(carReady[i])
+            cars[i].position.x = -(WIDTH/45) + (WIDTH/75)*i;
             cars[i].scale.set(WIDTH/carScaleFactor, WIDTH/carScaleFactor, WIDTH/carScaleFactor);
     }
 }
