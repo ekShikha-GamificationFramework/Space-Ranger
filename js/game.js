@@ -9,6 +9,8 @@ var worldLeft = -30, worldRight = 30;
 //for timings
 var then;
 
+var requestID;
+
 //lights
 var hemisphereLight, shadowLight, ambientLight;
 
@@ -30,13 +32,14 @@ var carMat = [null, null, null, null];
 var playerCar;  //number of player's car - {0, 1, 2, 3}
 var smarty, average, idiot;    //random enemies
 var answerTime = [3, 3, 3, 3];    //time took by computer cars to answer (in seconds)
-var answerTimeRange = [1, 4];     //range between which the computer answers, e.g after every random(1, 4) seconds
+var answerTimeRange = [1, 3];     //range between which the computer answers, e.g after every random(1, 4) seconds
 var carReady = [false, false, false, false];
 var accelerations = [0, 0, 0, 0];  //accelerations of all cars
 var defaultSpeed = 100;
 var speedUp = 50, speedDown = -30;
 var stars = [];
 var starCount = 100;
+var checkerBoard;
 
 var startTime;
 var lastAnsweredTime = [];
@@ -57,10 +60,10 @@ function init(event) {
 
     loadingManager = new THREE.LoadingManager();
     loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
-        console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        //console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
     };
     loadingManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
-    	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+    	//console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
     };
     loadingManager.onLoad = function ( ) {
     	console.log( 'Loading complete!');
@@ -80,6 +83,7 @@ function init(event) {
     loadCars();
     createRoad();
     createStars();
+    createCheckerBoard();
 
     //add the listener
     //document.body.addEventListener('onkeyup', onkey, false);
@@ -119,7 +123,7 @@ function loop() {
     //console.log(1000/delta + " fps");
 
     // call the loop function again
-    requestAnimationFrame(loop);
+    requestID = requestAnimationFrame(loop);
 }
 
 function updateCars(delta) {
@@ -232,20 +236,21 @@ function clicked(option) {
         idiot = ar[Math.floor(Math.random()*ar.length)];
         ar.splice(ar.indexOf(idiot), 1);
 
-        //reset cars' rotation
-        for(var i = 0; i < 4; i++) {
-            cars[i].rotation.y = Math.PI;
-        }
-        showQuestion();
         showingMenu = false;
-        startTime = Date.now();
-        for(i = 0; i < 4; i++) {
-            lastAnsweredTime[i] = startTime;
-        }
+
         document.getElementById("time").innerHTML = "TIME: " + 0;
         SCORE = 0;
         document.getElementById("score").innerHTML = "SCORE: " + SCORE;
         document.getElementById("middle").innerHTML = "";
+        cancelAnimationFrame(requestID);
+        //reset cars' rotation
+        for(var i = 0; i < 4; i++) {
+            cars[i].rotation.y = Math.PI;
+        }
+        //reset checkerboard position
+        checkerBoard.position.set(0, 0, -20);
+        renderer.render(scene, camera);
+        setTimeout(displayStart, 100);
         return;
     }
 
@@ -264,6 +269,37 @@ function clicked(option) {
     //document.getElementById("question").classList.toggle('question-close');
     //setTimeout(showQuestion, 1000);
     showQuestion();
+}
+
+function displayStart() {
+    switch (document.getElementById("middle").innerHTML) {
+        case "3":
+            document.getElementById("middle").innerHTML = "2";
+            setTimeout(displayStart, 1000);
+            break;
+        case "2":
+            document.getElementById("middle").innerHTML = "1";
+            setTimeout(displayStart, 1000);
+            break;
+        case "1":
+            document.getElementById("middle").innerHTML = "GO";
+            setTimeout(beforeStartingMainLoop, 500);
+            break;
+        default:
+            document.getElementById("middle").innerHTML = "3";
+            setTimeout(displayStart, 1000);
+            break;
+    }
+}
+
+function beforeStartingMainLoop() {
+    startTime = Date.now();
+    for(i = 0; i < 4; i++) {
+        lastAnsweredTime[i] = startTime;
+    }
+    showQuestion();
+    document.getElementById("middle").innerHTML = "";
+    loop();
 }
 
 //Question constructor
@@ -323,7 +359,6 @@ function createCars() {
         carReady[i] = true;
         cars[i].rotation.y = Math.PI;
         cars[i].position.x = -(WIDTH/45) + (WIDTH/75)*i;
-        console.log(WIDTH);
         cars[i].scale.set(WIDTH/carScaleFactor, WIDTH/carScaleFactor, WIDTH/carScaleFactor);
     }
 }
@@ -353,6 +388,25 @@ function updateStars() {
         }
     }
 }
+function createCheckerBoard() {
+    // Geometry
+    var cbgeometry = new THREE.PlaneGeometry(worldRight*2 + 20, 15, 8, 3);
+    // Materials
+    var cbmaterials = [];
+    cbmaterials.push(new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.DoubleSide }));
+    cbmaterials.push(new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.DoubleSide }));
+    var l = cbgeometry.faces.length / 2;
+    for(var i = 0; i < l; i++) {
+        j = i * 2;
+        cbgeometry.faces[j].materialIndex = ((i + Math.floor(i/8)) % 2);
+        cbgeometry.faces[j+1].materialIndex = ((i + Math.floor(i/8)) % 2);
+    }
+    // Mesh
+    checkerBoard = new THREE.Mesh( cbgeometry, new THREE.MeshFaceMaterial( cbmaterials ) );
+    scene.add(checkerBoard);
+    checkerBoard.rotation.x = Math.PI/2;
+    checkerBoard.position.set(100, 100, 100); //somewhere far away
+}
 function createScene() {
     //Get the width and height of the screen,
     //use them to set up the aspect ratio of the camera
@@ -381,7 +435,7 @@ function createScene() {
 
     //set the position of the camera
     camera.position.x = 0;
-    camera.position.z = 50;
+    camera.position.z = cameraOffset;
     camera.position.y = 20;
     camera.rotation.x = -Math.PI/8;
 
@@ -419,7 +473,6 @@ function handleWindowResize() {
     renderer.setSize(WIDTH, HEIGHT);
     camera.aspect = WIDTH / HEIGHT;
     camera.updateProjectionMatrix();
-    console.log(WIDTH);
 
     for(var i = 0; i < 4; i++) {
         if(carReady[i])
