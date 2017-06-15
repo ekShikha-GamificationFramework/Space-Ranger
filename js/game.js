@@ -22,6 +22,8 @@ var Colors = [
 //game objects
 var loadingManager;
 var cars = [];
+var carScaleFactor = 500;
+//var carDistanceFactor =
 var carGeom;
 var carMat = [null, null, null, null];
 var playerCar;  //number of player's car - {0, 1, 2, 3}
@@ -304,7 +306,7 @@ function createCars() {
         cars[i].position.x = -22.5 + 15*i;
         carReady[i] = true;
         cars[i].rotation.y = Math.PI;
-        cars[i].scale.set(2.5, 2.5, 2.5);
+        cars[i].scale.set(WIDTH/carScaleFactor, WIDTH/carScaleFactor, WIDTH/carScaleFactor);
     }
 }
 
@@ -399,6 +401,10 @@ function handleWindowResize() {
     renderer.setSize(WIDTH, HEIGHT);
     camera.aspect = WIDTH / HEIGHT;
     camera.updateProjectionMatrix();
+    for(var i = 0; i < 4; i++) {
+        if(carReady[i])
+            cars[i].scale.set(WIDTH/carScaleFactor, WIDTH/carScaleFactor, WIDTH/carScaleFactor);
+    }
 }
 
 function createLights() {
