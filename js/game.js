@@ -1,4 +1,5 @@
 window.addEventListener('load', init, false);
+var SCORE = 0;
 
 //three js scene and camera
 var scene, camera, fieldOfView, aspectRatio, nearPlane, farPlane,
@@ -107,6 +108,7 @@ function loop() {
         updateCars(delta);
         updateCamera();
         updateStars();
+        document.getElementById("time").innerHTML = "TIME: " + Math.floor((Date.now() - startTime)/1000) + "s";
     }
 
     //render the scene
@@ -236,19 +238,30 @@ function clicked(option) {
         for(i = 0; i < 4; i++) {
             lastAnsweredTime[i] = startTime;
         }
+        document.getElementById("time").innerHTML = "TIME: " + 0;
+        SCORE = 0;
+        document.getElementById("score").innerHTML = "SCORE: " + SCORE;
+        document.getElementById("middle").innerHTML = "";
         return;
     }
 
     // TODO: don't repeat questions
-    if(option.innerHTML == currentQuestion.correctOption)
+    if(option.innerHTML == currentQuestion.correctOption) {
         accelerations[playerCar] = speedUp;
-    else {
+        //increase score
+        SCORE += 2;
+        document.getElementById("score").innerHTML = "SCORE: " + SCORE;
+    } else {
         accelerations[playerCar] = speedDown;
+        //decrease score
+        SCORE -= 1;
+        document.getElementById("score").innerHTML = "SCORE: " + SCORE;
     }
     //document.getElementById("question").classList.toggle('question-close');
     //setTimeout(showQuestion, 1000);
     showQuestion();
 }
+
 //Question constructor
 function Question(questionString, correctOption, incorrectOption1, incorrectOption2, incorrectOption3) {
     this.questionString = questionString;
