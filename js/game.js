@@ -35,8 +35,9 @@ var answerTime = [3, 3, 3, 3];    //time took by computer cars to answer (in sec
 var answerTimeRange = [1, 3];     //range between which the computer answers, e.g after every random(1, 4) seconds
 var carReady = [false, false, false, false];
 var accelerations = [0, 0, 0, 0];  //accelerations of all cars
-var defaultSpeed = 100;
-var speedUp = 50, speedDown = -30;
+var defaultSpeed = 50;
+var speedUp = 300, speedDown = -150;
+var upRate = 1600, downRate = 600;
 var stars = [];
 var starCount = 100;
 var checkerBoard;
@@ -55,6 +56,8 @@ questions.push(new Question("What is 5 - 2 = ?", "3", "50", "11", "7"));
 questions.push(new Question("What is 10 X 10 = ?", "100", "50", "110", "901"));
 var currentQuestion;
 
+//for stats of student
+var totalQuestions = 0, correctAnswers = 0, incorrectAnswers = 0;
 
 function init(event) {
 
@@ -171,19 +174,18 @@ function updateCars(delta) {
         }
     }
 
-    var rate = 80;
     if(carReady[0] && carReady[1] && carReady[2] && carReady[3]) {
         if(delta >= 100) return;
         for(var i = 0; i < 4; i++) {
             cars[i].position.z -= (defaultSpeed + accelerations[i] + Math.random()*4) * delta / 1000;
             cars[i].position.y += ((Math.random()*4) - 2) * delta / 1000;
             if(accelerations [i] > 0) {
-                accelerations[i] -= rate * delta / 1000;
+                accelerations[i] -= upRate * delta / 1000;
                 if(accelerations[i] < 0)
                     accelerations[i] = 0;
             }
             else if(accelerations[i] < 0) {
-                accelerations[i] += rate * delta / 1000;
+                accelerations[i] += downRate * delta / 1000;
                 if(accelerations[i] > 0)
                     accelerations[i] = 0;
             }
@@ -238,10 +240,12 @@ function clicked(option) {
 
         showingMenu = false;
 
-        document.getElementById("time").innerHTML = "TIME: " + 0;
+        document.getElementById("time").innerHTML = "TIME: " + 0 + "s";
         SCORE = 0;
         document.getElementById("score").innerHTML = "SCORE: " + SCORE;
         document.getElementById("middle").innerHTML = "";
+        document.getElementById("question").style.visibility = "hidden";
+        document.getElementById("options").style.visibility = "hidden";
         cancelAnimationFrame(requestID);
         //reset cars' rotation
         for(var i = 0; i < 4; i++) {
@@ -254,21 +258,25 @@ function clicked(option) {
         return;
     }
 
-    // TODO: don't repeat questions
+    document.getElementById("question").style.visibility = "hidden";
+    document.getElementById("options").style.visibility = "hidden";
+    option.style.visibility = "visible";
     if(option.innerHTML == currentQuestion.correctOption) {
         accelerations[playerCar] = speedUp;
         //increase score
         SCORE += 2;
         document.getElementById("score").innerHTML = "SCORE: " + SCORE;
+        correctAnswers++;
     } else {
         accelerations[playerCar] = speedDown;
         //decrease score
         SCORE -= 1;
         document.getElementById("score").innerHTML = "SCORE: " + SCORE;
+        incorrectAnswers++;
     }
     //document.getElementById("question").classList.toggle('question-close');
-    //setTimeout(showQuestion, 1000);
-    showQuestion();
+    setTimeout(showQuestion, 300);
+    //showQuestion();
 }
 
 function displayStart() {
@@ -311,7 +319,10 @@ function Question(questionString, correctOption, incorrectOption1, incorrectOpti
 function showQuestion() {
     //console.log(document.getElementById("question").classList);
     //document.getElementById("question").classList.toggle('question-open');
+    // TODO: don't repeat questions
     var index = Math.floor(Math.random() * questions.length);
+    document.getElementById("question").style.visibility = "visible";
+    document.getElementById("options").style.visibility = "visible";
     document.getElementById("question").innerHTML = questions[index].questionString;
     var randomOption = Math.floor(Math.random()*4);
     for(var i = 0, j = 0; i < 4; i++) {
@@ -321,8 +332,10 @@ function showQuestion() {
             document.getElementById("option" + (i+1)).innerHTML = questions[index].incorrectOptions[j];
             j++;
         }
+        document.getElementById("option" + (i+1)).style.visibility = "inherit";
     }
     currentQuestion = questions[index];
+    totalQuestions++;
 }
 function showMenu() {
     document.getElementById("question").innerHTML = "Select Vehicle:";
