@@ -1,5 +1,6 @@
 window.addEventListener('load', init, false);
 var SCORE = 0;
+var GAMEOVER = false;
 
 //three js scene and camera
 var scene, camera, fieldOfView, aspectRatio, nearPlane, farPlane,
@@ -14,14 +15,6 @@ var requestID;
 //lights
 var hemisphereLight, shadowLight, ambientLight;
 
-var Colors = [
-    0xf25346,
-    0xd8d0d1,
-    0x59332e,
-    0xF5986E,
-    0x23190f,
-    0x68c3c0];
-
 //game objects
 var loadingManager;
 var cars = [];
@@ -34,13 +27,18 @@ var smarty, average, idiot;    //random enemies
 var answerTime = [3, 3, 3, 3];    //time took by computer cars to answer (in seconds)
 var answerTimeRange = [1, 3];     //range between which the computer answers, e.g after every random(1, 4) seconds
 var carReady = [false, false, false, false];
+var carReached = [false, false, false, false];
 var accelerations = [0, 0, 0, 0];  //accelerations of all cars
 var defaultSpeed = 50;
-var speedUp = 300, speedDown = -150;
-var upRate = 1600, downRate = 600;
+var speedUp = 80, speedDown = -80;
+var upRate = 120, downRate = 180;
 var stars = [];
 var starCount = 100;
-var checkerBoard;
+var checkerBoard, endCheckerBoard;
+var totalDistance = 500;        //Distance of race
+
+//finishing position of player
+var finishingPosition = 1;
 
 var startTime;
 var lastAnsweredTime = [];
@@ -61,6 +59,8 @@ var totalQuestions = 0, correctAnswers = 0, incorrectAnswers = 0;
 
 function init(event) {
 
+    document.getElementById("middle").innerHTML = "loading...";
+
     loadingManager = new THREE.LoadingManager();
     loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
         //console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
@@ -71,6 +71,13 @@ function init(event) {
     loadingManager.onLoad = function ( ) {
     	console.log( 'Loading complete!');
         createCars();
+        //show menu
+        showMenu();
+        document.getElementById("middle").innerHTML = "SPACE RANGERS";
+        //start a loop that will update the objects' positions
+        //and render the scene on each frame
+        then = Date.now();
+        loop();
     };
     loadingManager.onError = function ( url ) {
     	console.log( 'There was an error loading ' + url );
@@ -87,21 +94,6 @@ function init(event) {
     createRoad();
     createStars();
     createCheckerBoard();
-
-    //add the listener
-    //document.body.addEventListener('onkeyup', onkey, false);
-    //playerCar = 2;
-
-    //show menu
-    showMenu();
-
-    //show first question
-    //showQuestion();
-
-    //start a loop that will update the objects' positions
-    //and render the scene on each frame
-    then = Date.now();
-    loop();
 }
 
 function loop() {
@@ -116,7 +108,9 @@ function loop() {
         updateCars(delta);
         updateCamera();
         updateStars();
-        document.getElementById("time").innerHTML = "TIME: " + Math.floor((Date.now() - startTime)/1000) + "s";
+        if(!GAMEOVER) {
+            document.getElementById("time").innerHTML = "TIME: " + Math.floor((Date.now() - startTime)/1000) + "s";
+        }
     }
 
     //render the scene
@@ -174,23 +168,52 @@ function updateCars(delta) {
         }
     }
 
-    if(carReady[0] && carReady[1] && carReady[2] && carReady[3]) {
+    if(carReady[0] && carReady[1] && carReady[2] && carReady[3]/* && !GAMEOVER*/) {
         if(delta >= 100) return;
         for(var i = 0; i < 4; i++) {
-            cars[i].position.z -= (defaultSpeed + accelerations[i] + Math.random()*4) * delta / 1000;
-            cars[i].position.y += ((Math.random()*4) - 2) * delta / 1000;
-            if(accelerations [i] > 0) {
-                accelerations[i] -= upRate * delta / 1000;
-                if(accelerations[i] < 0)
-                    accelerations[i] = 0;
+            if(!carReached[i]) {
+                cars[i].position.z -= (defaultSpeed + accelerations[i] + Math.random()*4) * delta / 1000;
+                cars[i].position.y += ((Math.random()*4) - 2) * delta / 1000;
+                if(accelerations [i] > 0) {
+                    accelerations[i] -= upRate * delta / 1000;
+                    if(accelerations[i] < 0)
+                        accelerations[i] = 0;
+                }
+                else if(accelerations[i] < 0) {
+                    accelerations[i] += downRate * delta / 1000;
+                    if(accelerations[i] > 0)
+                        accelerations[i] = 0;
+                }
             }
-            else if(accelerations[i] < 0) {
-                accelerations[i] += downRate * delta / 1000;
-                if(accelerations[i] > 0)
-                    accelerations[i] = 0;
+            if(Math.abs(cars[i].position.z) > totalDistance && !carReached[i]) {
+                carReached[i] = true;
+                if(i != playerCar) finishingPosition++;
+                if (i == playerCar && !GAMEOVER) {
+                    gameOver();
+                }
             }
         }
     }
+}
+
+function gameOver() {
+    console.log("game Over");
+    GAMEOVER = true;
+    document.getElementById("middle").style.fontSize = "30px";
+    document.getElementById("middle").innerHTML = "<br><br><h2>--- RACE OVER ---</h2><br>score: " + SCORE
+                                                + "<br>Position: " + finishingPosition
+                                                + "<br>time: " + Math.floor((Date.now() - startTime)/1000) + "s"
+                                                + "<br>Questions asked : " + totalQuestions
+                                                + "<br>Correct answers : " + correctAnswers
+                                                + "<br>Accuracy : " + (correctAnswers * 100/ totalQuestions).toFixed(2) + "%";
+    document.getElementById("time").innerHTML = "";
+    document.getElementById("score").innerHTML = "";
+    document.getElementById("question").style.visibility = "hidden";
+    document.getElementById("options").style.visibility = "hidden";
+
+    //sends score to the page this file will be embedded in
+  	window.parent.postMessage(SCORE, '*');
+
 }
 
 function rotateCars() {
@@ -252,7 +275,8 @@ function clicked(option) {
             cars[i].rotation.y = Math.PI;
         }
         //reset checkerboard position
-        checkerBoard.position.set(0, 0, -20);
+        checkerBoard.position.set(0, -5, -20);
+        endCheckerBoard.position.set(0, -5, -totalDistance + 10);
         renderer.render(scene, camera);
         setTimeout(displayStart, 100);
         return;
@@ -419,6 +443,9 @@ function createCheckerBoard() {
     scene.add(checkerBoard);
     checkerBoard.rotation.x = Math.PI/2;
     checkerBoard.position.set(100, 100, 100); //somewhere far away
+    endCheckerBoard = checkerBoard.clone();
+    endCheckerBoard.position.set(100, 100, 100);
+    scene.add(endCheckerBoard);
 }
 function createScene() {
     //Get the width and height of the screen,
@@ -493,7 +520,6 @@ function handleWindowResize() {
             cars[i].scale.set(WIDTH/carScaleFactor, WIDTH/carScaleFactor, WIDTH/carScaleFactor);
     }
 }
-
 function createLights() {
     // A hemisphere light is a gradient colored light;
     // the first parameter is the sky color, the second parameter is the ground color
