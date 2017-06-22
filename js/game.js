@@ -46,12 +46,12 @@ var showingMenu = true;
 var cameraOffset = 40;   //Camera's distance from player's car
 
 //set of questions
-var questions = [];
+var questions = [];/*
 questions.push(new Question("What is 7 + 1 = ?", "8", "9", "10", "6"));
 questions.push(new Question("What is 8 / 2 = ?", "4", "5", "6", "9"));
 questions.push(new Question("What is 3 X 2 = ?", "6", "5", "1", "9"));
 questions.push(new Question("What is 5 - 2 = ?", "3", "50", "11", "7"));
-questions.push(new Question("What is 10 X 10 = ?", "100", "50", "110", "901"));
+questions.push(new Question("What is 10 X 10 = ?", "100", "50", "110", "901"));*/
 var currentQuestion;
 
 //for stats of student
@@ -63,13 +63,13 @@ function init(event) {
 
     loadingManager = new THREE.LoadingManager();
     loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
-        //console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+        console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
     };
     loadingManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
     	//console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
     };
     loadingManager.onLoad = function ( ) {
-    	console.log( 'Loading complete!');
+    	//console.log( 'Loading complete!');
         createCars();
         //show menu
         showMenu();
@@ -81,6 +81,7 @@ function init(event) {
     };
     loadingManager.onError = function ( url ) {
     	console.log( 'There was an error loading ' + url );
+        document.getElementById("middle").innerHTML = "ERROR<br>Please Refresh";
     };
 
     //set up the scene, the camera and the renderer
@@ -174,7 +175,7 @@ function updateCars(delta) {
             if(!carReached[i]) {
                 cars[i].position.z -= (defaultSpeed + accelerations[i] + Math.random()*4) * delta / 1000;
                 cars[i].position.y += ((Math.random()*4) - 2) * delta / 1000;
-                if(accelerations [i] > 0) {
+                if(accelerations[i] > 0) {
                     accelerations[i] -= upRate * delta / 1000;
                     if(accelerations[i] < 0)
                         accelerations[i] = 0;
@@ -197,7 +198,7 @@ function updateCars(delta) {
 }
 
 function gameOver() {
-    console.log("game Over");
+    //console.log("game Over");
     GAMEOVER = true;
     document.getElementById("middle").style.fontSize = "30px";
     document.getElementById("middle").innerHTML = "<br><br><h2>--- RACE OVER ---</h2><br>score: " + SCORE
@@ -213,7 +214,6 @@ function gameOver() {
 
     //sends score to the page this file will be embedded in
   	window.parent.postMessage(SCORE, '*');
-
 }
 
 function rotateCars() {
@@ -276,7 +276,7 @@ function clicked(option) {
         }
         //reset checkerboard position
         checkerBoard.position.set(0, -5, -20);
-        endCheckerBoard.position.set(0, -5, -totalDistance + 10);
+        endCheckerBoard.position.set(0, -5, -totalDistance - 5);
         renderer.render(scene, camera);
         setTimeout(displayStart, 100);
         return;
@@ -341,25 +341,34 @@ function Question(questionString, correctOption, incorrectOption1, incorrectOpti
     this.incorrectOptions = [incorrectOption1, incorrectOption2, incorrectOption3];
 }
 function showQuestion() {
-    //console.log(document.getElementById("question").classList);
-    //document.getElementById("question").classList.toggle('question-open');
-    // TODO: don't repeat questions
-    var index = Math.floor(Math.random() * questions.length);
-    document.getElementById("question").style.visibility = "visible";
-    document.getElementById("options").style.visibility = "visible";
-    document.getElementById("question").innerHTML = questions[index].questionString;
-    var randomOption = Math.floor(Math.random()*4);
-    for(var i = 0, j = 0; i < 4; i++) {
-        if(randomOption == i)
-            document.getElementById("option" + (i+1)).innerHTML = questions[index].correctOption;
-        else {
-            document.getElementById("option" + (i+1)).innerHTML = questions[index].incorrectOptions[j];
-            j++;
+    //console.log(questions.length);
+    if(questions.length > 0 ) {
+        var index = Math.floor(Math.random() * questions.length);
+        document.getElementById("question").style.visibility = "visible";
+        document.getElementById("options").style.visibility = "visible";
+        document.getElementById("question").innerHTML = questions[index].questionString;
+        var randomOption = Math.floor(Math.random()*4);
+        for(var i = 0, j = 0; i < 4; i++) {
+            if(randomOption == i)
+                document.getElementById("option" + (i+1)).innerHTML = questions[index].correctOption;
+            else {
+                document.getElementById("option" + (i+1)).innerHTML = questions[index].incorrectOptions[j];
+                j++;
+            }
+            document.getElementById("option" + (i+1)).style.visibility = "inherit";
         }
-        document.getElementById("option" + (i+1)).style.visibility = "inherit";
+        currentQuestion = questions[index];
+        questions.splice(index, 1);
+        totalQuestions++;
+    } else {
+        document.getElementById("question").style.visibility = "visible";
+        document.getElementById("options").style.visibility = "hidden";
+        document.getElementById("question").innerHTML = "NO MORE QUESTIONS";
+        for(var i = 1; i <= 4; i++) {
+            document.getElementById("option"+i).innerHTML = "";
+            document.getElementById("option"+i).style.visibility = "hidden";
+        }
     }
-    currentQuestion = questions[index];
-    totalQuestions++;
 }
 function showMenu() {
     document.getElementById("question").innerHTML = "Select Vehicle:";
