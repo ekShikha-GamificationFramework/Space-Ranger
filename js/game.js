@@ -25,7 +25,7 @@ var carMat = [null, null, null, null];
 var playerCar;  //number of player's car - {0, 1, 2, 3}
 var smarty, average, idiot;    //random enemies
 var answerTime = [3, 3, 3, 3];    //time took by computer cars to answer (in seconds)
-var answerTimeRange = [1, 3];     //range between which the computer answers, e.g after every random(1, 4) seconds
+var answerTimeRange = [2, 4];     //range between which the computer answers, e.g after every random(1, 4) seconds
 var carReady = [false, false, false, false];
 var carReached = [false, false, false, false];
 var accelerations = [0, 0, 0, 0];  //accelerations of all cars
@@ -35,7 +35,7 @@ var upRate = 120, downRate = 180;
 var stars = [];
 var starCount = 100;
 var checkerBoard, endCheckerBoard;
-var totalDistance = 500;        //Distance of race
+var totalDistance = 1000;        //Distance of race
 
 //finishing position of player
 var finishingPosition = 1;
@@ -46,12 +46,7 @@ var showingMenu = true;
 var cameraOffset = 40;   //Camera's distance from player's car
 
 //set of questions
-var questions = [];/*
-questions.push(new Question("What is 7 + 1 = ?", "8", "9", "10", "6"));
-questions.push(new Question("What is 8 / 2 = ?", "4", "5", "6", "9"));
-questions.push(new Question("What is 3 X 2 = ?", "6", "5", "1", "9"));
-questions.push(new Question("What is 5 - 2 = ?", "3", "50", "11", "7"));
-questions.push(new Question("What is 10 X 10 = ?", "100", "50", "110", "901"));*/
+var questions = [];
 var currentQuestion;
 
 //for stats of student
