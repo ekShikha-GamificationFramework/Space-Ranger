@@ -2,10 +2,9 @@ window.addEventListener('load', loadQuestions, false);
 var xhttp;
 function loadQuestions() {
     var urlParams = parseURLParams(window.location.href);
-    var x = 1, y = 1;
+    var k = 1;
     if(urlParams) {
-        x = urlParams["x"][0];
-        y = urlParams["y"][0];
+        k = urlParams["k"][0];
     }
     xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -20,7 +19,7 @@ function loadQuestions() {
             }
         }
     };
-    xhttp.open("GET", "questions" + x + y + ".json");
+    xhttp.open("GET", "questions" + k + ".json");
     xhttp.send();
 }
 
