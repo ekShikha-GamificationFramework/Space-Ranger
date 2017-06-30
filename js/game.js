@@ -208,7 +208,7 @@ function gameOver() {
     document.getElementById("options").style.visibility = "hidden";
 
     //sends score to the page this file will be embedded in
-  	window.parent.postMessage(SCORE, '*');
+  	window.parent.postMessage({"SCORE":SCORE, "GAMEOVER":GAMEOVER}, '*');
 }
 
 function rotateCars() {
